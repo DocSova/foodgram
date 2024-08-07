@@ -1,13 +1,8 @@
-FROM node:18
+# build env
+FROM node:21.7.1-alpine
 WORKDIR /app
-
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-
+COPY package*.json ./
 RUN npm install
-
-COPY . .
+COPY . ./
 RUN npm run build
-RUN npm install --global http-server
-
-CMD ["npx", "-y", "http-server", "-p", "9090", "/app/build"]
+CMD cp -r build result_build
