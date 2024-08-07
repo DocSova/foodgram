@@ -39,4 +39,4 @@ services:
       - static:/static
       - media:/app/media
     ports:
-      - 8000:80
+      - 9090:80
