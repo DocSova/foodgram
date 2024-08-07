@@ -40,19 +40,19 @@ jobs:
               with:
                 context: ./backend/
                 push: true
-                tags: efendievm95/foodgram_backend:latest
+                tags: drsova/foodgram_backend:latest
             - name: Push to DockerHub frontend
               uses: docker/build-push-action@v4
               with:
                 push: true
                 context: ./frontend/
-                tags: efendievm95/foodgram_frontend:latest
+                tags: drsova/foodgram_frontend:latest
             - name: Push to DockerHub gateaway
               uses: docker/build-push-action@v4
               with:
                 push: true
                 context: ./nginx/
-                tags: efendievm95/gateaway:latest
+                tags: drsova/gateaway:latest
 
     deploy:
         runs-on: ubuntu-latest
