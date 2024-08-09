@@ -1,5 +1,3 @@
-from django.http import Http404
-from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status, mixins, viewsets
 from rest_framework.decorators import action
@@ -8,6 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+
+from django.http import Http404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminAuthorOrReadOnly
@@ -22,7 +23,6 @@ from api.serializers import (
     UserSubscribeRepresentSerializer,
 )
 from api.helpers.view_helper import RecipeProcessor, get_shopping_cart
-
 from recipes.models import (
     Tag,
     Ingredient,
