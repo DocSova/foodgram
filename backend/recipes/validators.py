@@ -2,7 +2,7 @@ import re
 
 from django.core.exceptions import ValidationError
 
-from .constants import USER_READ_EDIT_URL
+from recipes.constants import USER_READ_EDIT_URL
 
 
 def username_validator(value):
