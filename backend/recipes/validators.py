@@ -1,7 +1,6 @@
 import re
 
 from django.core.exceptions import ValidationError
-
 from recipes.constants import USER_READ_EDIT_URL
 
 
