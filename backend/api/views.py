@@ -1,9 +1,6 @@
 from django.http import Http404
-
 from django_filters.rest_framework import DjangoFilterBackend
-
 from djoser.views import UserViewSet as DjoserUserViewSet
-
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -25,7 +22,6 @@ from api.serializers import (
     UserSubscribeRepresentSerializer,
     UserSubscribeSerializer,
 )
-
 from recipes.models import (
     Favorite,
     Ingredient,
