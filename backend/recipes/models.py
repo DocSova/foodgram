@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.forms import ValidationError
-
 from recipes.constants import LENGTH, MIN_VALUE_MSG, MIN_VALUE
 from recipes.validators import username_validator, color_validator
 
