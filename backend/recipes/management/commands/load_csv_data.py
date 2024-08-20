@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 
 from recipes.models import Ingredient
 
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -15,6 +16,9 @@ class Command(BaseCommand):
                 name, measurement_unit = row
 
                 if name:
-                    ingredient = Ingredient(name=name, measurement_unit=measurement_unit)
-                    ingredients_to_create.append(ingredient)
-            Ingredient.objects.bulk_create(ingredients_to_create)
+                    ingredient = Ingredient(
+                        name=name,
+                        measurement_unit=measurement_unit
+                    )
+                    ingredients_array.append(ingredient)
+            Ingredient.objects.bulk_create(ingredients_array)
