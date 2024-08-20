@@ -138,8 +138,8 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-        author = self.context["author"]
-        user = self.context["request"].user
+        author = data["author"]
+        user = self.context.get("request").user
         is_subscribed = Subscription.objects.filter(
             author=author,
             user=user
