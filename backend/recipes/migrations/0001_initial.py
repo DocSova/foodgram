@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=200, verbose_name='Название')),
                 ('text', models.TextField(verbose_name='Описание')),
                 ('image', models.ImageField(upload_to='recipes/', verbose_name='Изображение')),
-                ('cooking_time', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1, 'Минимальное значение для поля 1.')], verbose_name='Время приготовления')),
+                ('cooking_time', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1, 'Минимальное значение для поля равно единице')], verbose_name='Время приготовления')),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL, verbose_name='Автор')),
             ],
             options={
@@ -128,7 +128,7 @@ class Migration(migrations.Migration):
             name='RecipeIngredient',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1, 'Минимальное значение для поля 1.')], verbose_name='Количество')),
+                ('amount', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1, 'Минимальное значение для поля равно единице')], verbose_name='Количество')),
                 ('ingredient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.ingredient', verbose_name='Ингредиент')),
                 ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.recipe', verbose_name='Рецепт')),
             ],
