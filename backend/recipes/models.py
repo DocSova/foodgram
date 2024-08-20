@@ -3,8 +3,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.forms import ValidationError
 
-from recipes.constants import LENGTH, MIN_VALUE_MSG, MIN_VALUE
-from recipes.validators import username_validator, color_validator
+from recipes.constants import MIN_VALUE_MSG, MIN_VALUE
+from recipes.validators import validate_username, validate_color
 
 
 class User(AbstractUser):
@@ -12,29 +12,25 @@ class User(AbstractUser):
 
     username = models.CharField(
         verbose_name="username",
-        max_length=LENGTH.l_150,
+        max_length=150,
         unique=True,
-        validators=[username_validator],
+        validators=[validate_username],
     )
     email = models.EmailField(
         verbose_name="email",
-        max_length=LENGTH.l_254,
+        max_length=254,
         unique=True,
     )
     first_name = models.CharField(
         verbose_name="Имя",
-        max_length=LENGTH.l_150,
+        max_length=150,
     )
     last_name = models.CharField(
         verbose_name="Фамилия",
-        max_length=LENGTH.l_150,
-    )
-    email = models.EmailField(
-        verbose_name="email",
-        max_length=LENGTH.l_254,
-        unique=True,
+        max_length=150,
     )
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 
@@ -47,8 +43,8 @@ class User(AbstractUser):
         return self.email
 
 
-class Subscribe(models.Model):
-    """Модель подписки."""
+class Subscription(models.Model):
+    """Модель подписок."""
 
     user = models.ForeignKey(
         User,
@@ -75,11 +71,11 @@ class Subscribe(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user} подписчик автора - {self.author}"
+        return f"{self.user} подписан на {self.author}"
 
     def clean(self):
         if self.user == self.author:
-            raise ValidationError("Нельзя подписаться на самого себя.")
+            raise ValidationError("Нельзя подписываться на самого себя.")
 
 
 class Tag(models.Model):
@@ -87,18 +83,18 @@ class Tag(models.Model):
 
     name = models.CharField(
         verbose_name="Название",
-        max_length=LENGTH.l_200,
+        max_length=200,
         unique=True,
     )
     color = models.CharField(
         verbose_name="Цвет",
-        max_length=LENGTH.l_7,
+        max_length=7,
         unique=True,
-        validators=[color_validator],
+        validators=[validate_color],
     )
     slug = models.SlugField(
         verbose_name="Слаг",
-        max_length=LENGTH.l_200,
+        max_length=200,
         unique=True,
         db_index=True,
     )
@@ -117,12 +113,12 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         verbose_name="Название",
-        max_length=LENGTH.l_200,
+        max_length=200,
         db_index=True,
     )
     measurement_unit = models.CharField(
         verbose_name="Единица измерения",
-        max_length=LENGTH.l_200,
+        max_length=200,
     )
 
     class Meta:
@@ -130,8 +126,10 @@ class Ingredient(models.Model):
         verbose_name_plural = "Ингредиенты"
         ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["name", "measurement_unit"],
-                                    name="unique_ingredient")
+            models.UniqueConstraint(
+                fields=["name", "measurement_unit"],
+                name="unique_ingredient"
+            )
         ]
 
     def __str__(self):
@@ -143,14 +141,10 @@ class Recipe(models.Model):
 
     name = models.CharField(
         verbose_name="Название",
-        max_length=LENGTH.l_200,
+        max_length=200,
     )
     text = models.TextField(
         verbose_name="Описание",
-    )
-    image = models.ImageField(
-        verbose_name="Изображение",
-        upload_to="recipes/",
     )
     author = models.ForeignKey(
         User,
@@ -173,6 +167,10 @@ class Recipe(models.Model):
         verbose_name="Теги",
         related_name="recipes",
     )
+    image = models.ImageField(
+        verbose_name="Изображение",
+        upload_to="recipes/",
+    )
 
     class Meta:
         verbose_name = "Рецепт"
@@ -181,45 +179,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class RecipeIngredient(models.Model):
-    """Связующая модель рецепт-ингредиент."""
-
-    recipe = models.ForeignKey(
-        Recipe,
-        verbose_name="Рецепт",
-        on_delete=models.CASCADE,
-        related_name="recipe_ingredients",
-    )
-    ingredient = models.ForeignKey(
-        Ingredient,
-        verbose_name="Ингредиент",
-        on_delete=models.CASCADE,
-        related_name="recipe_ingredients",
-    )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name="Количество",
-        validators=[MinValueValidator(MIN_VALUE, MIN_VALUE_MSG)],
-    )
-
-    class Meta:
-        verbose_name = "Ингредиент в рецепте"
-        verbose_name_plural = "Ингредиенты в рецептах"
-        db_table = "recipes_recipe_ingredient"
-        ordering = ["id"]
-        constraints = [
-            models.UniqueConstraint(fields=["recipe", "ingredient"],
-                                    name="unique_recipe_ingredient")
-        ]
-
-    def __str__(self):
-        return (
-            f"{self.recipe.name}: "
-            f"{self.ingredient.name} - "
-            f"{self.amount}/"
-            f"{self.ingredient.measurement_unit}"
-        )
 
 
 class Favorite(models.Model):
@@ -254,7 +213,7 @@ class Favorite(models.Model):
 
 
 class ShoppingCart(models.Model):
-    """Модель списка покупок."""
+    """Модель покупок."""
 
     user = models.ForeignKey(
         User,
@@ -283,3 +242,37 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.recipe}"
+
+
+class RecipeIngredient(models.Model):
+    """Модель рецепт-ингредиент."""
+
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name="Рецепт",
+        on_delete=models.CASCADE,
+        related_name="recipe_ingredients",
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        verbose_name="Ингредиент",
+        on_delete=models.CASCADE,
+        related_name="recipe_ingredients",
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name="Количество",
+        validators=[MinValueValidator(MIN_VALUE, MIN_VALUE_MSG)],
+    )
+
+    class Meta:
+        db_table = "recipes_recipe_ingredient"
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recipe", "ingredient"],
+                name="unique_recipe_ingredient"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.recipe.name}: {self.ingredient.name}"
