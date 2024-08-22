@@ -20,10 +20,12 @@ urlpatterns = [
     path(
         "users/subscriptions/",
         UserSubscriptionsViewSet.as_view({"get": "list"}),
+        name="subscriptions"
     ),
     path(
         "users/<int:user_id>/subscribe/",
         UserSubscriptionView.as_view(),
+        name="subscribe",
     ),
     path(
         "users/me/avatar/",
