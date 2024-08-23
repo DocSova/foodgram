@@ -44,3 +44,11 @@ docker compose up -d
 
 ### Откройте ваш браузер и перейдите по адресу http://localhost:9090 для взаимодействия с "Фудграм".
 ### Адрес админки http://localhost:9090/admin/
+
+### Развернутая версия проекта: https://drsovafoodgram.zapto.org/
+### Адрес админки https://drsovafoodgram.zapto.org/admin
+
+### Доступы к админ-панели:
+
+Логин: te@te.te
+Пароль: 123
