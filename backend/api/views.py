@@ -47,7 +47,9 @@ class RecipeViewSet(ModelViewSet):
             return RecipeGetSerializer
         return RecipeCreateUpdateSerializer
 
-    def recipe_process(self, request, recipe, model, serializer, error_text):
+    def recipe_process(self, request, pk, model, serializer, error_text):
+        recipe = get_object_or_404(Recipe, id=pk)
+
         if request.method == "POST":
             new_item, created = model.objects.get_or_create(
                 user=request.user, recipe=recipe)
@@ -60,14 +62,14 @@ class RecipeViewSet(ModelViewSet):
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            old_item = get_object_or_404(
-                model,
-                user=request.user,
-                recipe=recipe
-            )
-            old_item.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        old_item = get_object_or_404(
+            model,
+            user=request.user,
+            recipe=recipe
+        )
+        old_item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
@@ -75,10 +77,9 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
         return self.recipe_process(
             request,
-            recipe,
+            pk,
             Favorite,
             FavoriteSerializer,
             'Рецепт уже добавлен в избранное.'
@@ -90,11 +91,9 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-
         return self.recipe_process(
             request,
-            recipe,
+            pk,
             ShoppingCart,
             ShoppingCartSerializer,
             'Рецепт уже добавлен в список покупок.'
@@ -116,14 +115,14 @@ class RecipeViewSet(ModelViewSet):
         ).values(
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')
-        ).order_by('ingredient__name').annotate(ing_amount=Sum('amount'))
+        ).order_by('ingredient__name').annotate(total_amount=Sum('amount'))
 
         text = 'Список покупок: \n\n'
 
         for recipe in shopping_cart:
             text += (
                 f'{recipe["name"]}: '
-                f'{recipe["ing_amount"]}/{recipe["measurement_unit"]}.\n'
+                f'{recipe["total_amount"]}/{recipe["measurement_unit"]}.\n'
             )
 
         response = HttpResponse(text, content_type='text/plain')
