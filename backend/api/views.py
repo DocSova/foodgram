@@ -1,3 +1,4 @@
+from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import F, Sum
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -5,7 +6,7 @@ from django.shortcuts import HttpResponse, get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -21,6 +22,7 @@ from api.serializers import (
     TagGetSerializer,
     UserSubscribeRepresentSerializer,
     UserSubscribeSerializer,
+    ShortLinkSerializer,
 )
 from recipes.models import (
     Favorite,
@@ -131,6 +133,25 @@ class RecipeViewSet(ModelViewSet):
             'filename="shopping_cart.txt"'
         )
         return response
+
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=(AllowAny,),
+        url_path="get-link"
+    )
+    def short_link(self, request, pk=None):
+        domain = get_current_site(request)
+        data = {
+            "recipe": pk,
+            "full_link": f"https://{domain}/recipes/{pk}"
+        }
+        serializer = ShortLinkSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        short_link = serializer.data.get("short_link")
+
+        return Response({"short-link": f"https://{domain}/s/{short_link}/"})
 
 
 class CustomUserViewSet(DjoserUserViewSet):

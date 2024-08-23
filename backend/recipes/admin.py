@@ -10,6 +10,7 @@ from recipes.models import (
     Subscription,
     Tag,
     User,
+    ShortLink,
 )
 
 
@@ -91,3 +92,11 @@ class RecipeAdmin(admin.ModelAdmin):
     def recipe_image(self, obj):
         if obj.image:
             return mark_safe(f"<img src='{obj.image.url}' width=50")
+
+
+@admin.register(ShortLink)
+class ShortLinkAdmin(admin.ModelAdmin):
+    """Панель коротких ссылок."""
+
+    list_display = ("recipe", "short_link", "full_link")
+    search_fields = ("recipe",)

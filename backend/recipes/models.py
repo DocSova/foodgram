@@ -276,3 +276,30 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.recipe}"
+
+
+class ShortLink(models.Model):
+    """Модель коротких ссылок."""
+
+    short_link = models.CharField(
+        verbose_name="Короткая ссылка",
+        max_length=20,
+        null=True
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name="Рецепт",
+        on_delete=models.CASCADE
+    )
+    full_link = models.URLField(
+        verbose_name="Полная ссылка",
+        max_length=100,
+        default=None
+    )
+
+    class Meta:
+        verbose_name = "Короткая ссылка"
+        verbose_name_plural = "Короткие ссылки"
+
+    def __str__(self):
+        return f"Короткая ссылка рецепта {self.recipe}"

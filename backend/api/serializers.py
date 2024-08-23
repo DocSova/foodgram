@@ -1,7 +1,11 @@
+import random
+import string
+
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator
+from django.core.exceptions import ObjectDoesNotExist
 
 from api.fields import Base64ImageField
 from recipes.constants import MIN_VALUE, MAX_VALUE
@@ -14,6 +18,7 @@ from recipes.models import (
     Favorite,
     ShoppingCart,
     Subscription,
+    ShortLink,
 )
 
 
@@ -260,7 +265,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if not data.get("tags"):
             raise ValidationError("Рецепт не может быть без тега!")
-        if not data.get("ingredients"):
+        if not self.initial_data.get("ingredients"):
             raise ValidationError("Рецепт не может быть без ингредиентов.")
         return data
 
@@ -381,3 +386,30 @@ class ShoppingCartSerializer(FavoriteSerializer):
                 message="Рецепт уже добавлен в список покупок",
             )
         ]
+
+
+class ShortLinkSerializer(serializers.ModelSerializer):
+    """Сериализатор коротких ссылок."""
+
+    def short_link(self):
+        characters = string.ascii_letters + string.digits
+        return "".join(random.choice(characters) for _ in range(10))
+
+    def create(self, validated_data):
+        try:
+            return ShortLink.objects.get(
+                recipe_id=validated_data["recipe"].id,
+                full_link=validated_data["full_link"]
+            )
+        except ObjectDoesNotExist:
+            return ShortLink.objects.create(
+                recipe=validated_data["recipe"],
+                full_link=validated_data["full_link"],
+                short_link=self.short_link()
+            )
+
+    class Meta:
+        model = ShortLink
+        fields = ("full_link", "recipe", "short_link")
+        read_only = ("short_link",)
+        write_only_fields = ("full_link", "recipe")
